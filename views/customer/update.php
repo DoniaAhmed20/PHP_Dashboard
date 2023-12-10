@@ -127,3 +127,101 @@ if ($result->num_rows > 0) {
 // Close the connection
 $conn->close();
 ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?php
+class Database
+{
+    private $servername = "localhost";
+    private $username = "root";
+    private $password = "";
+    private $dbname = "php_project";
+    private $conn;
+
+    // Constructor to establish the database connection
+    public function __construct()
+    {
+        $this->conn = new mysqli($this->servername, $this->username, $this->password, $this->dbname);
+
+        // Check connection
+        if ($this->conn->connect_error) {
+            die("Connection failed: " . $this->conn->connect_error);
+        }
+    }
+
+    // Fetch orders for a specified user
+    public function getOrders($user_id)
+    {
+        $user_id = $this->conn->real_escape_string($user_id); // Sanitize input
+
+        $sql = "SELECT * FROM order_detailes WHERE order_code = '$user_id'";
+        $result = $this->conn->query($sql);
+
+        return $result;
+    }
+
+    // Close the database connection
+    public function closeConnection()
+    {
+        $this->conn->close();
+    }
+}
+
+// Instantiate the Database class
+$database = new Database();
+
+// Replace 'your_user_id' with the actual user ID
+$user_id = 8; // Replace with the actual user ID
+
+// Fetch orders for the specified user
+$result = $database->getOrders($user_id);
+
+if ($result->num_rows > 0) {
+    // Display orders
+    ?>
+    <table class="table table-striped table-sm table-bordered">
+        <thead>
+            <tr class="text-center">
+                <th>ID</th>
+                <th>Order Code</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row["id"] . "</td>";
+                echo "<td>" . $row["order_code"] . "</td>";
+                echo "<td>" . $row["product_name"] . "</td>"; // Adjust column names
+                echo "<td>" . $row["price"] . "</td>";
+                echo "<td>" . $row["quantity"] . "</td>"; // Adjust column names
+                echo "<td>Action</td>"; // Replace with the appropriate action column content
+                echo "</tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+    <?php
+} else {
+    echo "No orders found for this customer.";
+}
+
+// Close the database connection
+$database->closeConnection();
+?>
